@@ -1,0 +1,11 @@
+name: lightning
+channels:
+  - conda-forge
+dependencies:
+  - cdsapi
+  - cartopy
+  - python>3.6
+  - jupyterlab=2
+  - matplotlib-base
+  - netcdf4
+  - xarray
