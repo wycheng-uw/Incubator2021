@@ -2,17 +2,13 @@
 '''
 Download hourly data for ML workflow per year 
 from https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5
-
 can monitor queue here https://cds.climate.copernicus.eu/live/queue 
 and details on limits https://cds.climate.copernicus.eu/live/limits
 The maximum number of per-user requests that access the online CDS data is 3
-
 1 level cap hourly , 15 min to process and download
 10 pressure levels hourly ~521MB, ~2hours to processes request and download
 for nightly runs, not a big deal GitHub Actions Workflow run time - Each workflow run is limited to 72 hours.
-
 CRS info: https://confluence.ecmwf.int/display/CKB/ERA5%3A+What+is+the+spatial+reference
-
 Usage: get_era_data.py 2017
 '''
 import sys
@@ -46,8 +42,8 @@ def make_request_dictionary(template, template_updates):
     return request_params
 
 
-def retrive_single_level(request):
-    outfile = 'ERA_{year}_{variable}.nc'.format(**request)
+def retrieve_single_level(request):
+    outfile = 'ERA5_{variable}_{year}.nc'.format(**request)
     if os.path.exists(outfile):
         print(f'{outfile} exists, skipping')
         return
@@ -69,11 +65,15 @@ def download_sequential(year):
     
 # Quick experiment with parallel downloads
 def retrieve_pressure_levels(request):
-    outfile = 'ERA_{year}_{variable}.nc'.format(**request)
+    outfile = 'ERA5_{year}_{varname}.nc'.format(**request)
     if os.path.exists(outfile):
         print(f'{outfile} exists, skipping')
     else:
-        c.retrieve('reanalysis-era5-pressure-levels', request, outfile)  
+        # update only a subset of the variables
+        keys_to_extract = ["year", "variable", "pressure_level"]
+        request_subset = {key: request[key] for key in keys_to_extract}
+
+        c.retrieve('reanalysis-era5-pressure-levels', request_subset, outfile)  
     
     
 def download_pressure_levels(year):
@@ -89,15 +89,22 @@ def download_pressure_levels(year):
                      'u_component_of_wind',
                      'v_component_of_wind'] 
     
+    varnames = ['z',
+                'q',
+                't',
+                'u',
+                'v']
+    
     requests = []
-    for var in pressure_vars:
+    for (var,varname) in zip(pressure_vars,varnames):
         update_params = dict(year=year,
                              variable=var,
+                             varname=varname,
                              pressure_level=[f'{n}00' for n in range(1,11)], # 100
                             )
         
         request = make_request_dictionary(request_template, update_params)
-        requests.append(make_request_dictionary(request_template, update_params))      
+        requests.append(request)      
     
     #nproc = 3 # cdsapi per-user limit
     nproc = len(requests)
