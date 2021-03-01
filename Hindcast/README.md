@@ -7,6 +7,7 @@ Our goal is to test if the ML-based F parameterization schemes can outperform th
 
 ## Scripts:
 - TK18.ipynb: Used to reproduce the results in TK18, except that using WWLLN data instead of NLDN.
+- GEFS_2d_variables_download.py: Used to download the GEFS hindcast dataset.
 
 ## Data Source:
 - GEFS: http://iridl.ldeo.columbia.edu/SOURCES/.Models/.SubX/.EMC/.GEFS/.hindcast/
