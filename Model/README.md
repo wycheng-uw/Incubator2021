@@ -1,5 +1,7 @@
 # ML analysis
 
+- Use plot_overview.ipynb to generate visuals to investigate the weather patterns for any given time.
+
 ## Step 1.
 - run_CreateDataset.ipynb
 - Integrate the dataset and save them in the netCDF format
