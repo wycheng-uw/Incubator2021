@@ -39,7 +39,7 @@ bash Miniforge3-Linux-x86_64.sh
 ```
 # Note this can take some time for NFS drives
 conda create -n jlab python=3 jupyterlab
-# or conda env create -f environment.yml
+# or conda env create -f incubator2021.yml
 ```
 
 1. start jupyterlab on pynchon
