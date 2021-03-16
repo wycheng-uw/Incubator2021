@@ -43,39 +43,54 @@ def make_request_dictionary(template, template_updates):
 
 
 def retrieve_single_level(request):
-    outfile = 'ERA5_{variable}_{year}.nc'.format(**request)
+    outfile = 'ERA5_{varname}_{year}.nc'.format(**request)
     if os.path.exists(outfile):
         print(f'{outfile} exists, skipping')
         return
-    
-    print(f'downloading {var} for {year}...')
-    c.retrieve('reanalysis-era5-single-levels', request_params, outfile)
-    
-    
-def download_sequential(year):
-    print('\n\nDownloading...\nvisit https://cds.climate.copernicus.eu/live/queue to monitor\n\n')
+    else:
+        # update only a subset of the variables
+        keys_to_extract = ["product_type", "variable", "year", "time", "area", "grid", "format"]
+        request_subset = {key: request[key] for key in keys_to_extract}
 
-    single_vars = ['convective_available_potential_energy']
-    
-    for var in single_vars:
-        request = make_request_dictionary(request_template, dict(year=year, var=var))
-        print(outfile, request)
-        retrieve_single_level(request, outfile)
-    
-    
+        c.retrieve('reanalysis-era5-single-levels', request_subset, outfile)
+
+
 # Quick experiment with parallel downloads
 def retrieve_pressure_levels(request):
-    outfile = 'ERA5_{year}_{varname}.nc'.format(**request)
+    outfile = 'ERA5_{varname}_{year}.nc'.format(**request)
     if os.path.exists(outfile):
         print(f'{outfile} exists, skipping')
     else:
         # update only a subset of the variables
-        keys_to_extract = ["year", "variable", "pressure_level"]
+        keys_to_extract = ["product_type", "variable", "year", "time", "area", "grid", "format", "pressure_level"]
         request_subset = {key: request[key] for key in keys_to_extract}
 
         c.retrieve('reanalysis-era5-pressure-levels', request_subset, outfile)  
     
     
+def download_single_level(year):
+
+    import multiprocessing
+
+    single_vars = ['convective_available_potential_energy']
+
+    varnames = ['cape']
+
+    requests = []
+    for (var, varname) in zip(single_vars,varnames):
+        update_params = dict(year=year,
+                             variable=var,
+                             varname=varname,
+                            )
+
+        request = make_request_dictionary(request_template, update_params)
+        requests.append(request)
+
+    nproc = len(requests)
+    pool = multiprocessing.Pool(processes=nproc)
+    pool.map(retrieve_single_level, requests)
+
+
 def download_pressure_levels(year):
     ''' use parallel processing to download pressure levels because it takes > 1hr to download... '''
     # https://stackoverflow.com/questions/34031681/passing-kwargs-with-multiprocessing-pool-map
@@ -114,5 +129,5 @@ def download_pressure_levels(year):
 
 if __name__ == "__main__":
     year = sys.argv[1]
-    #download_single_level(year)
+    download_single_level(year)
     download_pressure_levels(year)
