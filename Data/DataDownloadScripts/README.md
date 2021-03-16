@@ -11,3 +11,4 @@
 ## WWLLN 
 - Gridded lightning stroke density over CONUS area can be found in the following Github link:
 - https://github.com/wycheng-uw/WWLLN-CONUS
+- For raw WWLLN dataset or nay WWLLN-related questions, contact Prof. Holzworth at bobholz@washington.edu.
